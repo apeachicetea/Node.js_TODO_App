@@ -5,12 +5,45 @@ const app = express();
 //2021년 이후로 설치한 프로젝트들은 body-parser 라이브러리가 express에 기본 포함이라 
 //따로 npm으로 설치할 필요가 없어졌다. 
 app.use(express.urlencoded({extended: true})); 
+app.set('view engine', 'ejs');
+const MongoClient = require('mongodb').MongoClient;
+let db;
+MongoClient.connect('mongodb+srv://eodbszla:1q2w3e4r@cluster0.7lq41.mongodb.net/todoapp?retryWrites=true&w=majority',
+  function(에러, client){
+    if(에러) {return console.log(에러)};
+    db = client.db('todoapp');
+    //db중 todoapp이라는 데이터베이스에 접근한다.
 
+    db.collection('post').insertOne({ 이름 : 'John', 나이 : 20, _id : 1 }, function(에러, 결과){
+    //db중 post라는 컬렉션에 접근한다. 데이터 저장방식은 객체형식으로 저장한다.
+      console.log('저장완료');
+    });
 
+    //1008 port로 웹서버를 열고 잘열리면 'listening on 1008'을 출력해주세요.
+    app.listen(1008, function(){
+      console.log('listening on 1008');
+    });
 
-//1008 port로 웹서버를 열고 잘열리면 'listening on 1008'을 출력해주세요.
-app.listen(1008, function(){
-  console.log('listening on 1008');
+})
+
+//어떤 사람이 /add 경로로 post 요청을 하면 ~를 해주세요.
+//input에 적은 정보는 어디있을까?? 바로 콜백함수 파라미터 req에 저장되어 있다.
+app.post('/add', function(req, rsp){
+  rsp.send('전송완료');
+  console.log(req.body.title);
+  console.log(req.body.date);
+  db.collection('post').insertOne({ _id : 3, 제목 : req.body.title, 날짜 : req.body.date }, function(에러, 결과){
+    console.log('저장완료');
+  })
+});
+
+// /list로 GET요청으로 접속하면 실제 DB에 저장된 데이터들로 예쁘게 꾸며진 HTML을 보여주세요.
+app.get('/list', function(req, rsp){
+  db.collection('post').find().toArray(function(에러, 결과){
+    console.log(결과);
+  });
+  //db에 저장된 post라는 컬렉션안의 모든 데이터를 꺼내주세요.
+  rsp.render('list.ejs', { posts : 결과 });
 });
 
 
@@ -30,15 +63,6 @@ app.get('/', function(req, rsp){
 
 app.get('/write', function(req, rsp){
   rsp.sendFile(__dirname + '/write.html');
-});
-
-
-
-//어떤 사람이 /add 경로로 post 요청을 하면 ~를 해주세요.
-//input에 적은 정보는 어디있을까?? 바로 콜백함수 파라미터 req에 저장되어 있다.
-app.post('/add', function(req, rsp){
-  rsp.send('전송완료');
-  console.log(req.body);
 });
 
 
