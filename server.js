@@ -14,10 +14,10 @@ MongoClient.connect('mongodb+srv://eodbszla:1q2w3e4r@cluster0.7lq41.mongodb.net/
     db = client.db('todoapp');
     //db중 todoapp이라는 데이터베이스에 접근한다.
 
-    db.collection('post').insertOne({ 이름 : 'John', 나이 : 20, _id : 1 }, function(에러, 결과){
-    //db중 post라는 컬렉션에 접근한다. 데이터 저장방식은 객체형식으로 저장한다.
-      console.log('저장완료');
-    });
+    // db.collection('post').insertOne({ 이름 : 'John', 나이 : 20, _id : 1 }, function(에러, 결과){
+    // //db중 post라는 컬렉션에 접근한다. 데이터 저장방식은 객체형식으로 저장한다.
+    //   console.log('저장완료');
+    // });
 
     //1008 port로 웹서버를 열고 잘열리면 'listening on 1008'을 출력해주세요.
     app.listen(1008, function(){
@@ -32,7 +32,7 @@ app.post('/add', function(req, rsp){
   rsp.send('전송완료');
   console.log(req.body.title);
   console.log(req.body.date);
-  db.collection('post').insertOne({ _id : 3, 제목 : req.body.title, 날짜 : req.body.date }, function(에러, 결과){
+  db.collection('post').insertOne({ _id : 4, 제목 : req.body.title, 날짜 : req.body.date }, function(에러, 결과){
     console.log('저장완료');
   })
 });
@@ -42,7 +42,7 @@ app.get('/list', function(req, rsp){
   db.collection('post').find().toArray(function(에러, 결과){
     console.log(결과);
   });
-  //db에 저장된 post라는 컬렉션안의 모든 데이터를 꺼내주세요.
+  //db에 저장된 post라는 컬렉션안의 모든 데이터를 꺼내주세요. posts라는 키에 데이터를 할당함. 
   rsp.render('list.ejs', { posts : 결과 });
 });
 
