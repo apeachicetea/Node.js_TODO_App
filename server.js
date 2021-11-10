@@ -23,28 +23,42 @@ MongoClient.connect('mongodb+srv://eodbszla:1q2w3e4r@cluster0.7lq41.mongodb.net/
     app.listen(1008, function(){
       console.log('listening on 1008');
     });
-
 })
 
-//어떤 사람이 /add 경로로 post 요청을 하면 ~를 해주세요.
-//input에 적은 정보는 어디있을까?? 바로 콜백함수 파라미터 req에 저장되어 있다.
-app.post('/add', function(req, rsp){
-  rsp.send('전송완료');
-  console.log(req.body.title);
-  console.log(req.body.date);
-  db.collection('post').insertOne({ _id : 4, 제목 : req.body.title, 날짜 : req.body.date }, function(에러, 결과){
-    console.log('저장완료');
-  })
-});
+  //어떤 사람이 /add 경로로 post 요청을 하면 ~를 해주세요.
+  //input에 적은 정보는 어디있을까?? 바로 콜백함수 파라미터 req에 저장되어 있다.
+  app.post('/add', function(req, rsp){
+    rsp.send('전송완료');
+    db.collection('counter').findOne({name : '게시물갯수'}, function(에러, 결과){
+    //db안의 counter라는 컬렉션에서 name : '게시물갯수'를 찾아줘
+      console.log(결과.totalPost);
+      let 총게시물갯수 = 결과.totalPost;
+      //찾은 컬렉션내용을 변수에 저장
 
-// /list로 GET요청으로 접속하면 실제 DB에 저장된 데이터들로 예쁘게 꾸며진 HTML을 보여주세요.
-app.get('/list', function(req, rsp){
-  db.collection('post').find().toArray(function(에러, 결과){
-    console.log(결과);
+      db.collection('post').insertOne({ _id : 총게시물갯수 + 1, 제목 : req.body.title, 날짜 : req.body.date }, function(에러, 결과){
+        console.log('저장완료');
+        //counter라는 콜렉션에 있는 totalPost라는 항목도 1증가시켜야함(수정).
+        //db.collection('counter').updateOne({ 어떤데이터를 수정할지 },{ operator : { 수정값 } }, function(에러, 결과){})
+        //operator 종류 => {$set:{totalPost:바꿀값}} , {$inc:{totalPost:기존값에 더해줄 값}}
+        db.collection('counter').updateOne({name : '게시물갯수'}, { $inc : {totalPost : 1} }, function(에러, 결과){
+          if(에러){return console.log(에러)};
+        })
+      })
+    });
   });
-  //db에 저장된 post라는 컬렉션안의 모든 데이터를 꺼내주세요. posts라는 키에 데이터를 할당함. 
-  rsp.render('list.ejs', { posts : 결과 });
-});
+
+  // /list로 GET요청으로 접속하면 실제 DB에 저장된 데이터들로 예쁘게 꾸며진 HTML을 보여주세요.
+  app.get('/list', function(req, rsp){
+    db.collection('post').find().toArray(function(에러, 결과){
+      console.log(결과);
+      rsp.render('list.ejs', { posts : 결과 });
+    //db에 저장된 post라는 컬렉션안의 모든 데이터를 꺼내주세요. posts라는 키에 데이터를 할당함.
+    });
+  });
+
+
+
+
 
 
 //~~경로로 들어오면 ~~를 보내줌
